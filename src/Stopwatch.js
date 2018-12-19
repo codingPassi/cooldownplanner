@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 
+let fileReader = null;
+
 class Stopwatch extends Component {
   state = {
     status: false,
@@ -52,6 +54,7 @@ class Stopwatch extends Component {
   handleReset = () => {
     clearInterval(this.timer); // new
     this.setState({ runningTime: 0, status: false, current: null, next: 0 });
+    document.body.style.backgroundColor = "red";
   };
 
   millisToMinutesAndSeconds(millis) {
@@ -68,8 +71,16 @@ class Stopwatch extends Component {
     return ms;
   }
 
-  handleFileUpload = file => {
-    this.ImportFile.handleFileChosen(file);
+  handleFileRead = e => {
+    const text = this.fileReader.result;
+    this.setState({ script: JSON.parse(text) });
+  };
+
+  handleFileChosen = file => {
+    this.fileReader = new FileReader();
+    this.fileReader.onloadend = this.handleFileRead;
+
+    this.fileReader.readAsText(file, "UTF-8");
   };
 
   render() {
@@ -80,7 +91,7 @@ class Stopwatch extends Component {
           type="file"
           id="file"
           accept=".json"
-          onChange={e => this.handleFileUpload(e.target.files[0])}
+          onChange={e => this.handleFileChosen(e.target.files[0])}
         />
 
         <p>{this.millisToMinutesAndSeconds(runningTime)}</p>
@@ -105,20 +116,5 @@ class Stopwatch extends Component {
     );
   }
 }
-
-const ImportFile = () => {
-  let fileReader;
-
-  const handleFileRead = e => {
-    const text = this.fileReader.result;
-  };
-
-  const handleFileChosen = file => {
-    this.fileReader = new FileReader();
-    this.fileReader.onloadend = this.handleFileRead;
-
-    this.fileReader.readAsText(file, "UTF-8");
-  };
-};
 
 export default Stopwatch;
